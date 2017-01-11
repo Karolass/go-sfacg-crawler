@@ -24,7 +24,41 @@ func run(URL string) {
     fmt.Println(string(bytes))
     fmt.Println(nextPage)
 
-    if len(nextPage) > 0 {
-        run(nextPage)
+    // get Chapters
+    runChatper(catalogs)
+
+    // if len(nextPage) > 0 {
+    //     run(nextPage)
+    // }
+}
+
+func runChatper(catalogs Catalogs) {
+    for _, catalog := range catalogs {
+        chapters := GetChapters(catalog.ID, catalog.URL)
+
+        bytes, err := json.MarshalIndent(chapters, "", "    ")
+        if err != nil {
+            log.Fatalln(err)
+        }
+
+        fmt.Println(catalog.Title)
+        fmt.Println(string(bytes))
+
+        // get Pages
+        runPage(chapters)
+    }
+}
+
+func runPage(chapters Chapters) {
+    for _, chapter := range chapters {
+        pages := GetPages(chapter.CatalogID, chapter.Title, chapter.URL)
+
+        bytes, err := json.MarshalIndent(pages, "", "    ")
+        if err != nil {
+            log.Fatalln(err)
+        }
+
+        fmt.Println(chapter.Title)
+        fmt.Println(string(bytes))
     }
 }
