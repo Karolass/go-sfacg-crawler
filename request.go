@@ -10,7 +10,7 @@ import (
     "github.com/PuerkitoBio/goquery"
 )
 
-func GetCatalogs(URL string) (catalogs Catalogs, nextPage string){
+func GetHtml(URL string) (res *http.Response) {
     client := &http.Client{}
 
     req, err := http.NewRequest("GET", URL, nil)
@@ -21,13 +21,18 @@ func GetCatalogs(URL string) (catalogs Catalogs, nextPage string){
     req.Header.Set("User-Agent",
         "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.94 Safari/537.36")
 
-    resp, err := client.Do(req)
+    res, err = client.Do(req)
     if err != nil {
         log.Fatalln(err)
     }
-    defer resp.Body.Close()
 
-    doc, err := goquery.NewDocumentFromReader(resp.Body)
+    return
+}
+
+func GetCatalogs(URL string) (catalogs Catalogs, nextPage string){
+
+    res := GetHtml(URL)
+    doc, err := goquery.NewDocumentFromResponse(res)
     if err != nil {
         log.Fatalln(err)
     }
@@ -83,23 +88,9 @@ func GetCatalogs(URL string) (catalogs Catalogs, nextPage string){
 }
 
 func GetChapters(catalogID string, URL string) (chapters Chapters){
-    client := &http.Client{}
 
-    req, err := http.NewRequest("GET", URL, nil)
-    if err != nil {
-        log.Fatalln(err)
-    }
-
-    req.Header.Set("User-Agent",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.94 Safari/537.36")
-
-    resp, err := client.Do(req)
-    if err != nil {
-        log.Fatalln(err)
-    }
-    defer resp.Body.Close()
-
-    doc, err := goquery.NewDocumentFromReader(resp.Body)
+    res := GetHtml(URL)
+    doc, err := goquery.NewDocumentFromResponse(res)
     if err != nil {
         log.Fatalln(err)
     }
@@ -131,23 +122,9 @@ func GetChapters(catalogID string, URL string) (chapters Chapters){
 }
 
 func GetPages(catalogID string, chapterTitle string, URL string) (pages Pages){
-    client := &http.Client{}
 
-    req, err := http.NewRequest("GET", URL, nil)
-    if err != nil {
-        log.Fatalln(err)
-    }
-
-    req.Header.Set("User-Agent",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.94 Safari/537.36")
-
-    resp, err := client.Do(req)
-    if err != nil {
-        log.Fatalln(err)
-    }
-    defer resp.Body.Close()
-
-    doc, err := goquery.NewDocumentFromReader(resp.Body)
+    res := GetHtml(URL)
+    doc, err := goquery.NewDocumentFromResponse(res)
     if err != nil {
         log.Fatalln(err)
     }
@@ -158,21 +135,8 @@ func GetPages(catalogID string, chapterTitle string, URL string) (pages Pages){
         jsURL = "http://comic.sfacg.com" + attr
     }
 
-    req, err = http.NewRequest("GET", jsURL, nil)
-    if err != nil {
-        log.Fatalln(err)
-    }
-
-    req.Header.Set("User-Agent",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.94 Safari/537.36")
-
-    resp, err = client.Do(req)
-    if err != nil {
-        log.Fatalln(err)
-    }
-    defer resp.Body.Close()
-
-    bytes, _ := ioutil.ReadAll(resp.Body)
+    res = GetHtml(jsURL)
+    bytes, _ := ioutil.ReadAll(res.Body)
     re := regexp.MustCompile(`\/Pic\/[\w|\/]+\.\w+`)
     for _, match := range re.FindAllString(string(bytes), -1) {
         pages = append(pages, Page{
