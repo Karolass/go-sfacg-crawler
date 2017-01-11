@@ -129,21 +129,20 @@ func GetPages(catalogID string, chapterTitle string, URL string) (pages Pages){
         log.Fatalln(err)
     }
 
-    var jsURL string
     attr, exist := doc.Find("script").Eq(1).Attr("src")
     if exist {
-        jsURL = "http://comic.sfacg.com" + attr
-    }
+        jsURL := "http://comic.sfacg.com" + attr
 
-    res = GetHtml(jsURL)
-    bytes, _ := ioutil.ReadAll(res.Body)
-    re := regexp.MustCompile(`\/Pic\/[\w|\/]+\.\w+`)
-    for _, match := range re.FindAllString(string(bytes), -1) {
-        pages = append(pages, Page{
-                    CatalogID: catalogID,
-                    ChapterTitle: chapterTitle,
-                    URL: "http://comic.sfacg.com" + match,
-                })
+        res = GetHtml(jsURL)
+        bytes, _ := ioutil.ReadAll(res.Body)
+        re := regexp.MustCompile(`\/Pic\/[\w|\/]+\.\w+`)
+        for _, match := range re.FindAllString(string(bytes), -1) {
+            pages = append(pages, Page{
+                        CatalogID: catalogID,
+                        ChapterTitle: chapterTitle,
+                        URL: "http://comic.sfacg.com" + match,
+                    })
+        }
     }
 
     return
