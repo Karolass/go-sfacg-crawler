@@ -29,7 +29,7 @@ func GetHtml(URL string) (res *http.Response) {
 	return
 }
 
-func GetCatalogs(URL string) (catalogs Catalogs, nextPage string) {
+func (catalogs *Catalogs) Get(URL string) (nextPage string) {
 
 	res := GetHtml(URL)
 	doc, err := goquery.NewDocumentFromResponse(res)
@@ -72,7 +72,7 @@ func GetCatalogs(URL string) (catalogs Catalogs, nextPage string) {
 			thumbnailURL, _ := this.Parent().Find("li.Conjunction").Find("img").Attr("src")
 
 			if len(ID) > 0 {
-				catalogs = append(catalogs, Catalog{
+				*catalogs = append(*catalogs, Catalog{
 					ID:           ID,
 					Title:        title,
 					Author:       author,
@@ -87,7 +87,7 @@ func GetCatalogs(URL string) (catalogs Catalogs, nextPage string) {
 	return
 }
 
-func GetChapters(catalogID string, URL string) (chapters Chapters) {
+func (chapters *Chapters) Get(catalogID string, URL string) {
 
 	res := GetHtml(URL)
 	doc, err := goquery.NewDocumentFromResponse(res)
@@ -111,7 +111,7 @@ func GetChapters(catalogID string, URL string) (chapters Chapters) {
 				URL = "http://comic.sfacg.com" + attr
 			}
 
-			chapters = append(chapters, Chapter{
+			*chapters = append(*chapters, Chapter{
 				CatalogID: catalogID,
 				Title:     title,
 				URL:       URL,
@@ -121,7 +121,7 @@ func GetChapters(catalogID string, URL string) (chapters Chapters) {
 	return
 }
 
-func GetPages(catalogID string, chapterTitle string, URL string) (pages Pages) {
+func (pages *Pages) Get(catalogID string, chapterTitle string, URL string) {
 
 	res := GetHtml(URL)
 	doc, err := goquery.NewDocumentFromResponse(res)
@@ -137,7 +137,7 @@ func GetPages(catalogID string, chapterTitle string, URL string) (pages Pages) {
 		bytes, _ := ioutil.ReadAll(res.Body)
 		re := regexp.MustCompile(`\/Pic\/[\w|\/]+\.\w+`)
 		for _, match := range re.FindAllString(string(bytes), -1) {
-			pages = append(pages, Page{
+			*pages = append(*pages, Page{
 				CatalogID:    catalogID,
 				ChapterTitle: chapterTitle,
 				URL:          "http://comic.sfacg.com" + match,

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	// "encoding/json"
-	// "log"
+	"log"
 	"time"
 )
 
@@ -20,17 +20,18 @@ func main() {
 }
 
 func run(URL string) {
-	catalogs, nextPage := GetCatalogs(URL)
+	catalogs := new(Catalogs)
+	nextPage := catalogs.Get(URL)
 
-	// bytes, err := json.MarshalIndent(catalogs, "", "    ")
-	// if err != nil {
-	//     log.Fatalln(err)
-	// }
+	bytes, err := json.MarshalIndent(catalogs, "", "    ")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	// fmt.Println(string(bytes))
-	// fmt.Println(nextPage)
+	fmt.Println(string(bytes))
+	fmt.Println(nextPage)
 
-	catalogCount += len(catalogs)
+	catalogCount += len(*catalogs)
 	// get Chapters
 	runChatper(catalogs)
 
@@ -41,9 +42,10 @@ func run(URL string) {
 	}
 }
 
-func runChatper(catalogs Catalogs) {
-	for _, catalog := range catalogs {
-		chapters := GetChapters(catalog.ID, catalog.URL)
+func runChatper(catalogs *Catalogs) {
+	chapters := new(Chapters)
+	for _, catalog := range *catalogs {
+		chapters.Get(catalog.ID, catalog.URL)
 
 		// bytes, err := json.MarshalIndent(chapters, "", "    ")
 		// if err != nil {
@@ -53,15 +55,16 @@ func runChatper(catalogs Catalogs) {
 		// fmt.Println(catalog.Title)
 		// fmt.Println(string(bytes))
 
-		chapterCount += len(chapters)
+		chapterCount += len(*chapters)
 		// get Pages
 		runPage(chapters)
 	}
 }
 
-func runPage(chapters Chapters) {
-	for _, chapter := range chapters {
-		pages := GetPages(chapter.CatalogID, chapter.Title, chapter.URL)
+func runPage(chapters *Chapters) {
+	pages := new(Pages)
+	for _, chapter := range *chapters {
+		pages.Get(chapter.CatalogID, chapter.Title, chapter.URL)
 
 		// bytes, err := json.MarshalIndent(pages, "", "    ")
 		// if err != nil {
@@ -71,6 +74,6 @@ func runPage(chapters Chapters) {
 		// fmt.Println(chapter.Title)
 		// fmt.Println(string(bytes))
 
-		pageCount += len(pages)
+		pageCount += len(*pages)
 	}
 }
