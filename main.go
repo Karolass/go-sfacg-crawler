@@ -1,42 +1,60 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
+	"flag"
 	"fmt"
-	"log"
-	"time"
+	// "log"
+	// "time"
 )
 
 var catalogCount, chapterCount, pageCount = 0, 0, 0
-var nowPage, limit = 1, 5
+var nowPage, limit = 1, 0
+
+var (
+	startFlag string
+)
+
+func init() {
+	flag.StringVar(&startFlag, "start", "catalog", "start scrape catalog(Default), chapter or page")
+	flag.Parse()
+}
 
 func main() {
-	start := time.Now()
-	run("http://comic.sfacg.com/Catalog/")
-	fmt.Printf("Total Catalog counts: %d \n", catalogCount)
-	fmt.Printf("Total Chapter counts: %d \n", chapterCount)
-	fmt.Printf("Total Page counts: %d \n", pageCount)
-	fmt.Println(time.Since(start))
+	if startFlag == "catalog" {
+		fmt.Printf("Scraping \"Catalog\"\n")
+		run("http://comic.sfacg.com/Catalog/")
+	}
+	// start := time.Now()
+	// run("http://comic.sfacg.com/Catalog/")
+	// fmt.Printf("Total Catalog counts: %d \n", catalogCount)
+	// fmt.Printf("Total Chapter counts: %d \n", chapterCount)
+	// fmt.Printf("Total Page counts: %d \n", pageCount)
+	// fmt.Println(time.Since(start))
 }
 
 func run(URL string) {
 	catalogs := new(Catalogs)
 	nextPage := catalogs.Get(URL)
 
-	bytes, err := json.MarshalIndent(catalogs, "", "    ")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// bytes, err := json.MarshalIndent(catalogs, "", "    ")
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
-	fmt.Println(string(bytes))
-	fmt.Println(nextPage)
+	// fmt.Println(string(bytes))
+	// fmt.Println(nextPage)
 
 	catalogCount += len(*catalogs)
 	// get Chapters
-	runChatper(catalogs)
+	// runChatper(catalogs)
+
+	for _, catalog := range *catalogs {
+		catalog.create()
+	}
 
 	fmt.Printf("Scrape catalog page %d complete!\n", nowPage)
-	if len(nextPage) > 0 && nowPage < limit {
+	if len(nextPage) > 0 && (limit == 0 || nowPage < limit) {
 		nowPage++
 		run(nextPage)
 	}
