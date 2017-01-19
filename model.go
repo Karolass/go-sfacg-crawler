@@ -2,12 +2,13 @@ package main
 
 type Catalog struct {
 	ID           string
-	Title        string
-	Author       string
-	Category     string
-	Description  string
+	Title        string `json:"title"`
+	Author       string `json:"author"`
+	Category     string `json:"category"`
+	Description  string `json:"description"`
 	URL          string
-	ThumbnailURL string
+	ThumbnailURL string `json:"thumbnailURL"`
+	ObjectId     string `json:"objectId"`
 }
 
 type Catalogs []Catalog

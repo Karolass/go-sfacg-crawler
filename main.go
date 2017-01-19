@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	// "log"
-	// "time"
 )
 
 var catalogCount, chapterCount, pageCount = 0, 0, 0
@@ -21,9 +20,15 @@ func init() {
 }
 
 func main() {
-	if startFlag == "catalog" {
+	switch startFlag {
+	case "catalog":
 		fmt.Printf("Scraping \"Catalog\"\n")
 		run("http://comic.sfacg.com/Catalog/")
+	case "chapter":
+		fmt.Printf("Scraping \"Chapter\"\n")
+		runChatper()
+	case "test":
+		fmt.Println(RandomTime())
 	}
 	// start := time.Now()
 	// run("http://comic.sfacg.com/Catalog/")
@@ -37,18 +42,6 @@ func run(URL string) {
 	catalogs := new(Catalogs)
 	nextPage := catalogs.Get(URL)
 
-	// bytes, err := json.MarshalIndent(catalogs, "", "    ")
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// fmt.Println(string(bytes))
-	// fmt.Println(nextPage)
-
-	catalogCount += len(*catalogs)
-	// get Chapters
-	// runChatper(catalogs)
-
 	for _, catalog := range *catalogs {
 		catalog.create()
 	}
@@ -60,22 +53,23 @@ func run(URL string) {
 	}
 }
 
-func runChatper(catalogs *Catalogs) {
-	chapters := new(Chapters)
-	for _, catalog := range *catalogs {
-		chapters.Get(catalog.ID, catalog.URL)
+func runChatper() {
+	catalogs := new(Catalogs)
 
-		// bytes, err := json.MarshalIndent(chapters, "", "    ")
-		// if err != nil {
-		//     log.Fatalln(err)
-		// }
+	count := catalogs.count()
+	var limit, skip = 100, 0
+	for count > 0 {
+		catalogs.find(skip, limit)
+		for _, c := range *catalogs {
+			chapters := new(Chapters)
+			chapters.Get(c.ID, c.URL)
+			for _, chapter := range *chapters {
+				chapter.create()
+			}
+		}
 
-		// fmt.Println(catalog.Title)
-		// fmt.Println(string(bytes))
-
-		chapterCount += len(*chapters)
-		// get Pages
-		runPage(chapters)
+		count -= limit
+		skip += limit
 	}
 }
 
