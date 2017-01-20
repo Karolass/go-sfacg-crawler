@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 var (
@@ -39,6 +40,27 @@ func ParseCreate(url string, body io.Reader) []byte {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer req.Body.Close()
+
+	req.Header.Set("X-Parse-Application-Id", "myAppId")
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer res.Body.Close()
+
+	return ReadResponseBody(res)
+}
+
+func ParseUpdate(url string, body io.Reader) []byte {
+	client := &http.Client{}
+
+	req, err := http.NewRequest("PUT", url, body)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -102,7 +124,7 @@ func (catalog *Catalog) create() string {
 
 	type results struct {
 		ObjectId  string
-		CreatedAt string
+		CreatedAt time.Time
 	}
 	r := new(results)
 	json.Unmarshal(bytes, &r)
@@ -115,15 +137,41 @@ func (chapter *Chapter) create() string {
 	url := parseURL + "chapter"
 	body := new(bytes.Buffer)
 	json.NewEncoder(body).Encode(chapter)
-
 	bytes := ParseCreate(url, body)
 
 	type results struct {
 		ObjectId  string
-		CreatedAt string
+		CreatedAt time.Time
 	}
 	r := new(results)
 	json.Unmarshal(bytes, &r)
 
 	return r.ObjectId
+}
+
+func (chapter *Chapter) addRelation(objId string, cObjId string) time.Time {
+	url := parseURL + "chapter/" + objId
+	jsonStr := fmt.Sprintf(`{
+                    "catalog": {
+                        "__op": "AddRelation",
+                        "objects": [
+                            {
+                                "__type": "Pointer",
+                                "className": "catalog",
+                                "objectId": "%s"
+                            }
+                        ]
+                    }
+                }`, cObjId)
+	body := bytes.NewBufferString(jsonStr)
+
+	bytes := ParseUpdate(url, body)
+
+	type results struct {
+		UpdatedAt time.Time
+	}
+	r := new(results)
+	json.Unmarshal(bytes, &r)
+
+	return r.UpdatedAt
 }

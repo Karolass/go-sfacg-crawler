@@ -22,10 +22,10 @@ func init() {
 func main() {
 	switch startFlag {
 	case "catalog":
-		fmt.Printf("Scraping \"Catalog\"\n")
+		fmt.Println("Scraping \"Catalog\"")
 		run("http://comic.sfacg.com/Catalog/")
 	case "chapter":
-		fmt.Printf("Scraping \"Chapter\"\n")
+		fmt.Println("Scraping \"Chapter\"")
 		runChatper()
 	case "test":
 		fmt.Println(RandomTime())
@@ -64,7 +64,9 @@ func runChatper() {
 			chapters := new(Chapters)
 			chapters.Get(c.ID, c.URL)
 			for _, chapter := range *chapters {
-				chapter.create()
+				fmt.Printf("Parse Creating %s %s \n", c.Title, chapter.Title)
+				objId := chapter.create()
+				chapter.addRelation(objId, c.ObjectId)
 			}
 		}
 

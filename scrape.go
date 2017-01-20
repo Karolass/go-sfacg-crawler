@@ -6,11 +6,15 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 func GetHtml(URL string) (res *http.Response) {
+	// sleep
+	time.Sleep(RandomTime())
+
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", URL, nil)
