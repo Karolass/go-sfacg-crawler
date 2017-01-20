@@ -27,6 +27,9 @@ func main() {
 	case "chapter":
 		fmt.Println("Scraping \"Chapter\"")
 		runChatper()
+	case "page":
+		fmt.Println("Scraping \"Page\"")
+		runPage()
 	case "test":
 		fmt.Println(RandomTime())
 	}
@@ -63,8 +66,8 @@ func runChatper() {
 		for _, c := range *catalogs {
 			chapters := new(Chapters)
 			chapters.Get(c.ID, c.URL)
+			fmt.Printf("Scrape \"%s\" chapters complete! Creating Parse data\n", c.Title)
 			for _, chapter := range *chapters {
-				fmt.Printf("Parse Creating %s %s \n", c.Title, chapter.Title)
 				objId := chapter.create()
 				chapter.addRelation(objId, c.ObjectId)
 			}
@@ -75,19 +78,26 @@ func runChatper() {
 	}
 }
 
-func runPage(chapters *Chapters) {
-	pages := new(Pages)
-	for _, chapter := range *chapters {
-		pages.Get(chapter.CatalogID, chapter.Title, chapter.URL)
+func runPage() {
+	chapters := new(Chapters)
 
-		// bytes, err := json.MarshalIndent(pages, "", "    ")
-		// if err != nil {
-		//     log.Fatalln(err)
-		// }
+	count := chapters.count()
+	var limit, skip = 100, 0
+	for count > 0 {
+		chapters.find(skip, limit)
+		for _, c := range *chapters {
+			pages := new(Pages)
+			pages.Get(c.CatalogID, c.Title, c.URL)
+			fmt.Printf("Scrape chapter \"%s\" pages complete! Creating Parse data\n", c.Title)
 
-		// fmt.Println(chapter.Title)
-		// fmt.Println(string(bytes))
+			chapterPage := new(ChapterPage)
+			for _, page := range *pages {
+				chapterPage.Pages = append(chapterPage.Pages, page.URL)
+			}
+			c.update(*chapterPage)
+		}
 
-		pageCount += len(*pages)
+		count -= limit
+		skip += limit
 	}
 }

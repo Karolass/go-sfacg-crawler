@@ -14,9 +14,10 @@ type Catalog struct {
 type Catalogs []Catalog
 
 type Chapter struct {
-	CatalogID string
-	Title     string
+	CatalogID string `json:"catalogID"`
+	Title     string `json:"title"`
 	URL       string
+	ObjectId  string `json:"objectId"`
 }
 
 type Chapters []Chapter
@@ -28,3 +29,7 @@ type Page struct {
 }
 
 type Pages []Page
+
+type ChapterPage struct {
+	Pages []string `json:"pages"`
+}

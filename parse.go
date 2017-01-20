@@ -133,6 +133,42 @@ func (catalog *Catalog) create() string {
 }
 
 /* Chapter */
+func (chapters *Chapters) find(skip, limit int) {
+	params := map[string]string{
+		"limit": fmt.Sprintf("%d", limit),
+		"skip":  fmt.Sprintf("%d", skip),
+	}
+	URL := URLQueryFormatter(parseURL, "chapter", params)
+
+	bytes := ParseFind(URL)
+
+	type results struct {
+		Results Chapters
+		Count   int
+	}
+	var c = new(results)
+	json.Unmarshal(bytes, &c)
+	*chapters = c.Results
+}
+
+func (chapters *Chapters) count() int {
+	params := map[string]string{
+		"limit": fmt.Sprintf("%d", 0),
+		"count": fmt.Sprintf("%d", 1),
+	}
+	URL := URLQueryFormatter(parseURL, "chapter", params)
+
+	bytes := ParseFind(URL)
+
+	type results struct {
+		Results Chapters
+		Count   int
+	}
+	var c = new(results)
+	json.Unmarshal(bytes, &c)
+	return c.Count
+}
+
 func (chapter *Chapter) create() string {
 	url := parseURL + "chapter"
 	body := new(bytes.Buffer)
@@ -147,6 +183,23 @@ func (chapter *Chapter) create() string {
 	json.Unmarshal(bytes, &r)
 
 	return r.ObjectId
+}
+
+func (chapter *Chapter) update(chapterPage ChapterPage) time.Time {
+	url := parseURL + "chapter/" + chapter.ObjectId
+
+	body := new(bytes.Buffer)
+	json.NewEncoder(body).Encode(chapterPage)
+
+	bytes := ParseUpdate(url, body)
+
+	type results struct {
+		UpdatedAt time.Time
+	}
+	r := new(results)
+	json.Unmarshal(bytes, &r)
+
+	return r.UpdatedAt
 }
 
 func (chapter *Chapter) addRelation(objId string, cObjId string) time.Time {
