@@ -133,10 +133,13 @@ func (catalog *Catalog) create() string {
 }
 
 /* Chapter */
-func (chapters *Chapters) find(skip, limit int) {
+func (chapters *Chapters) find(skip, limit int, pageNull bool) {
 	params := map[string]string{
 		"limit": fmt.Sprintf("%d", limit),
 		"skip":  fmt.Sprintf("%d", skip),
+	}
+	if pageNull {
+		params["where"] = `{"pages":null}`
 	}
 	URL := URLQueryFormatter(parseURL, "chapter", params)
 
@@ -151,10 +154,13 @@ func (chapters *Chapters) find(skip, limit int) {
 	*chapters = c.Results
 }
 
-func (chapters *Chapters) count() int {
+func (chapters *Chapters) count(pageNull bool) int {
 	params := map[string]string{
 		"limit": fmt.Sprintf("%d", 0),
 		"count": fmt.Sprintf("%d", 1),
+	}
+	if pageNull {
+		params["where"] = `{"pages":null}`
 	}
 	URL := URLQueryFormatter(parseURL, "chapter", params)
 

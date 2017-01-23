@@ -30,6 +30,9 @@ func main() {
 	case "page":
 		fmt.Println("Scraping \"Page\"")
 		runPage()
+	case "pagenull":
+		fmt.Println("Scraping \"Page for Chapter pages null\"")
+		runPageNull()
 	case "test":
 		fmt.Println(RandomTime())
 	}
@@ -81,14 +84,38 @@ func runChatper() {
 func runPage() {
 	chapters := new(Chapters)
 
-	count := chapters.count()
+	count := chapters.count(false)
 	var limit, skip = 100, 0
 	for count > 0 {
-		chapters.find(skip, limit)
+		chapters.find(skip, limit, false)
 		for _, c := range *chapters {
 			pages := new(Pages)
 			pages.Get(c.CatalogID, c.Title, c.URL)
-			fmt.Printf("Scrape chapter \"%s\" pages complete! Creating Parse data\n", c.Title)
+			fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
+
+			chapterPage := new(ChapterPage)
+			for _, page := range *pages {
+				chapterPage.Pages = append(chapterPage.Pages, page.URL)
+			}
+			c.update(*chapterPage)
+		}
+
+		count -= limit
+		skip += limit
+	}
+}
+
+func runPageNull() {
+	chapters := new(Chapters)
+
+	count := chapters.count(true)
+	var limit, skip = 100, 0
+	for count > 0 {
+		chapters.find(skip, limit, true)
+		for _, c := range *chapters {
+			pages := new(Pages)
+			pages.Get(c.CatalogID, c.Title, c.URL)
+			fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
 
 			chapterPage := new(ChapterPage)
 			for _, page := range *pages {
