@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -136,10 +137,11 @@ func (pages *Pages) Get(catalogID string, chapterTitle string, URL string) {
 	attr, exist := doc.Find("script").Eq(1).Attr("src")
 	if exist {
 		jsURL := "http://comic.sfacg.com" + attr
+		URL, _ := url.Parse(jsURL)
 
-		res = GetHtml(jsURL)
+		res = GetHtml(URL.String())
 		bytes, _ := ioutil.ReadAll(res.Body)
-		re := regexp.MustCompile(`\/Pic\/[\w|\/]+\.\w+`)
+		re := regexp.MustCompile(`\/Pic\/[\w|\s|\/]+\.\w+`)
 		for _, match := range re.FindAllString(string(bytes), -1) {
 			*pages = append(*pages, Page{
 				CatalogID:    catalogID,

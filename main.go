@@ -91,13 +91,17 @@ func runPage() {
 		for _, c := range *chapters {
 			pages := new(Pages)
 			pages.Get(c.CatalogID, c.Title, c.URL)
-			fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
+			if len(*pages) > 0 {
+				fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
 
-			chapterPage := new(ChapterPage)
-			for _, page := range *pages {
-				chapterPage.Pages = append(chapterPage.Pages, page.URL)
+				chapterPage := new(ChapterPage)
+				for _, page := range *pages {
+					chapterPage.Pages = append(chapterPage.Pages, page.URL)
+				}
+				c.update(*chapterPage)
+			} else {
+				fmt.Printf("Scrape \"%s\" chapter \"%s\" no page data\n", c.CatalogID, c.Title)
 			}
-			c.update(*chapterPage)
 		}
 
 		count -= limit
@@ -115,13 +119,18 @@ func runPageNull() {
 		for _, c := range *chapters {
 			pages := new(Pages)
 			pages.Get(c.CatalogID, c.Title, c.URL)
-			fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
 
-			chapterPage := new(ChapterPage)
-			for _, page := range *pages {
-				chapterPage.Pages = append(chapterPage.Pages, page.URL)
+			if len(*pages) > 0 {
+				fmt.Printf("Scrape \"%s\" chapter \"%s\" pages complete! Creating Parse data\n", c.CatalogID, c.Title)
+
+				chapterPage := new(ChapterPage)
+				for _, page := range *pages {
+					chapterPage.Pages = append(chapterPage.Pages, page.URL)
+				}
+				c.update(*chapterPage)
+			} else {
+				fmt.Printf("Scrape \"%s\" chapter \"%s\" no page data\n", c.CatalogID, c.Title)
 			}
-			c.update(*chapterPage)
 		}
 
 		count -= limit
