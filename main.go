@@ -1,10 +1,8 @@
 package main
 
 import (
-	// "encoding/json"
 	"flag"
 	"fmt"
-	// "log"
 )
 
 var catalogCount, chapterCount, pageCount = 0, 0, 0
@@ -34,7 +32,8 @@ func main() {
 		fmt.Println("Scraping \"Page for Chapter pages null\"")
 		runPageNull()
 	case "test":
-		fmt.Println(RandomTime())
+		pages := new(Pages)
+		pages.Get("", "", "http://comic.sfacg.com/HTML/juxingbs/023j/")
 	}
 	// start := time.Now()
 	// run("http://comic.sfacg.com/Catalog/")
